@@ -1,9 +1,11 @@
 import numpy as np
 import pandas as pd
 
+
 def extract_features(d, axis=0, shape=1):
     feature_names = ['mean','std','med','abs_max','iqr']
     idx = 0
+    series_flag = False
 
     if isinstance(d, pd.Series):
         series_flag = True
