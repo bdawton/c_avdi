@@ -109,7 +109,7 @@ for entry in big_table_data:
 
     # extraction time
     start_time = time.time()
-    features, feature_names = extract_features(quant_sampled_data)
+    features, feature_names = extract_features(quant_sampled_data, axis=1, shape=0)
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     """# vehicle type estimation """
@@ -158,6 +158,11 @@ for itr in range(10):
 
     iter_conf_mat += group_conf_mat
 
+"""# Output metrics"""
+
+metrics = classification_report(np.concatenate(y_true_list), np.concatenate(y_pred_list), digits=3)
+print(metrics)
+
 """"# Set plotting parameters for use in Latex publication """
 
 plt.rcParams['font.family'] = 'Times'
@@ -181,10 +186,5 @@ sns_plot = sns.heatmap(
 
 )
 plt.show()
-plt.xlabel('Estimated Type'),
-plt.ylabel('Actual Type'),
-
-"""# Output metrics"""
-
-metrics = classification_report(np.concatenate(y_true_list), np.concatenate(y_pred_list), digits=3)
-print(metrics)
+plt.xlabel('Estimated Type')
+plt.ylabel('Actual Type')

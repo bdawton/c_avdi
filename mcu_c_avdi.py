@@ -105,13 +105,14 @@ for entry in big_table_data:
     downsample_interval = int(scaling_factor * f_prs / sample_freq)
     start = 0
     sampled_data = lpf_mixed[:, start::downsample_interval]
+    # please note here that dec_points=1 in the MCU implementation, versus dec_points=2 in full simulation script
     quant_sampled_data = quantiser(sampled_data, B, axis=1, dec_points=1)
 
     """# feature extraction"""
 
     # extraction time
     start_time = time.time()
-    features, feature_names = extract_features(quant_sampled_data)
+    features, feature_names = extract_features(quant_sampled_data, 1, 0)
     print("time elapsed: {:.2f}s".format(time.time() - start_time))
 
     """# vehicle type estimation """
@@ -128,7 +129,6 @@ for entry in big_table_data:
     x_hold[entry] = x
     y_hold[entry] = y
     c_mea_hold[entry] = c_mea
-
 
 """# Perform classification"""
 # Final matrix, labels, and predictions
@@ -155,7 +155,7 @@ for group in group_list:
         n_estimators=100,  # Small amount of trees to fit ported model on MCU. Can be changed depending on MCU memory
         min_samples_leaf=3,
         random_state=rand_seed,
-        n_jobs=-1, # -1 means multithreading
+        n_jobs=-1,  # -1 means multithreading
     )
 
     score, conf_mat, fit_model, y_pred, y_true, c_mea_resamp = validate(x_train, y_train, x_test, y_test, orig_model,
@@ -167,12 +167,18 @@ for group in group_list:
 
     """# Export for MCU"""
     # Export resampled labels and corresponding compressive measurements to text file
-    np.savetxt('lab_' + str(group_name) + '.txt', y_true, delimiter=",", fmt='%i') # Save labels to text file
-    np.savetxt('c_mea_' + str(group_name) + '.txt', c_mea_resamp, delimiter=",", fmt='%f') # Save compressive measurements to text file
+    np.savetxt('lab_' + str(group_name) + '.txt', y_true, delimiter=",", fmt='%i')  # Save labels to text file
+    np.savetxt('c_mea_' + str(group_name) + '.txt', c_mea_resamp, delimiter=",",
+               fmt='%f')  # Save compressive measurements to text file
 
     # Port classifier to C and export as .h file
     rf_c_code = modified_emlearn.convert(fit_model, method='inline')
     rf_c_code.save(file='classifier_to_test_' + str(group_name) + '.h')
+
+"""# Output metrics"""
+
+metrics = classification_report(np.concatenate(y_true_list), np.concatenate(y_pred_list), digits=3)
+print(metrics)
 
 """"# Set plotting parameters for use in Latex publication """
 
@@ -197,10 +203,5 @@ sns_plot = sns.heatmap(
 
 )
 plt.show()
-plt.xlabel('Estimated Type'),
-plt.ylabel('Actual Type'),
-
-"""# Output metrics"""
-
-metrics = classification_report(np.concatenate(y_true_list), np.concatenate(y_pred_list), digits=3)
-print(metrics)
+plt.xlabel('Estimated Type')
+plt.ylabel('Actual Type')

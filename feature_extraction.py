@@ -26,7 +26,7 @@ def extract_features(d, axis=0, shape=1):
     # med
     features[:, idx] = np.median(d, axis)
     idx += 1
-    # absolute max
+    # largest absolute value
     features[:, idx] = np.max(np.abs(d), axis)
     idx += 1
     # inter-quantile range
