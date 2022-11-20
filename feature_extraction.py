@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def extract_features(d, axis=0, shape=1):
-    feature_names = ['mean','std','med','abs_max','iqr']
+    feature_names = ['mean','std','med','large_abs','iqr']
     idx = 0
     series_flag = False
 
@@ -11,7 +11,7 @@ def extract_features(d, axis=0, shape=1):
         series_flag = True
         name = d.name
         row_name = d.index
-        d.to_numpy()
+        d = d.to_numpy(copy=True)
 
     if np.ndim(d) == 1:
         features = np.empty([1, len(feature_names)], dtype=np.float64)

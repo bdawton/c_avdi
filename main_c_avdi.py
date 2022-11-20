@@ -149,8 +149,8 @@ for itr in range(10):
         x_train = np.concatenate(list(chain(x_temp.values())))
         y_train = np.concatenate(list(chain(y_temp.values())))
 
-        orig_model = RandomForestClassifier(n_estimators=1000, min_samples_leaf=3, random_state=rand_seed, n_jobs=-1) # n_jobs is -1 for multithreading
-        score, conf_mat, fit_model, y_pred, y_true, unused_var = validate(x_train, y_train, x_test, y_test, orig_model,
+        model = RandomForestClassifier(n_estimators=1000, min_samples_leaf=3, random_state=rand_seed, n_jobs=-1) # n_jobs is -1 for multithreading
+        score, conf_mat, fit_model, y_pred, y_true, unused_var = validate(x_train, y_train, x_test, y_test, model,
                                                               random_state=rand_seed)
         y_true_list.append(y_true)
         y_pred_list.append(y_pred)
